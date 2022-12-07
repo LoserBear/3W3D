@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html>
+<style>
+#info {
+  position: absolute;
+  top: 0px;
+  width: 100%;
+  padding: 0px;
+  text-align: center;
+  color: #ffff00
+}
+
+body {
+  overflow: hidden;
+  padding: 0px;
+  margin:0px;
+}
+</style>
+<body>
+
+
+<script src="https://threejs.org/build/three.min.js"></script>
+<script src="https://threejs.org/examples/js/controls/OrbitControls.js"></script>
+<script
+  src="https://code.jquery.com/jquery-3.6.0.min.js"
+  integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+  crossorigin="anonymous"></script>
+<div id = "info">
+<button id = 'camerapos' style = "width: 20%;margin-right:40px;background-color:gray;">Camera</button>
+<button id = 'light' style = "width: 20%;margin-right:40px;background-color:gray;">Light On</button>
+</div>
+
+<script>
+var camera, scene, renderer;
+var lights = [];
+var LightSwitch =true;
+var CameraPos=0;
+
+
+$("#light").click(function(){
+	LightSwitch = !LightSwitch;
+})
+$("#camerapos").click(function(){
+	CameraPos++;
+})
+
+
+class Light{
+	constructor(x,z,target){
+		
+		let cylinder = new THREE.Mesh(new THREE.CylinderGeometry(5,5,15,16,16),new THREE.MeshBasicMaterial({color:
+0xc5c7c7
+}));
+		let group = new THREE.Group();
+		let lightGroup = new THREE.Group();
+		cylinder.rotation.x = Math.PI / 2;
+		cylinder.position.z = 30;
+		lightGroup.add(cylinder);
+		this.spotLight = new THREE.SpotLight(0xffffff, 0.5, 200, Math.PI / 4, 0.5);
+		this.spotLight.position.set(0,0,0);
+		this.spotLight.power = 5;
+		this.spotLight.target =target;
+		group.add(this.spotLight,lightGroup);
+		group.position.set(x,200,z);
+		group.lookAt (target.position);
+		scene.add(group);
+		
+		
+		
+	}
+}
+class Wall{
+	constructor (length,height ,width,x,y,z){
+	var wall=new THREE.Mesh (new THREE.BoxGeometry(length,height, width), new THREE.MeshPhongMaterial({color:"gray"}));
+	scene.add (wall);
+	wall.position.set(x,y,z);
+	}
+}
+
+
+init();
+animate();
+
+
+function init() {
+
+  scene = new THREE.Scene();
+
+  renderer = new THREE.WebGLRenderer();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setClearColor(0x666666);
+  document.body.appendChild(renderer.domElement);
+ 
+  camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 5000);
+  let controls = new THREE.OrbitControls(camera, renderer.domElement);
+  //let grid = new THREE.GridHelper (200,20, 'red', 'white');scene.add (grid);
+  
+  
+  
+	
+  buildWall();
+  buildFloor();
+  buildChair(275,320);
+  buildChair(275,-320);
+  buildChair(-275,320);
+  buildChair(-275,-320);
+  buildPaint();
+  buildLight();
+  buildWire();
+  
+  
+  
+  const light = new THREE.AmbientLight( 0x888888 ); // soft white light
+  scene.add( light );
+  
+   
+}
+
+
+function buildWall(){
+  var right= new Wall(1000,200, 30,0,100,500);
+  var rsplit1= new Wall(400,200, 30,300,100,150);
+  var rsplit2= new Wall(400,200, 30,-300,100,150); 
+  var left= new Wall(1000,200, 30,0,100,-500);
+  var lsplit1= new Wall(400,200, 30,300,100,-150);
+  var lsplit2= new Wall(400,200, 30,-300,100,-150);
+  var up= new Wall(30,200, 1030,500,100,0);
+  var down1= new Wall(30,200, 450,-500,100,290);
+  var down1= new Wall(30,200, 450,-500,100,-290);
+}
+
+function buildPaint(){
+  let loader = new THREE.TextureLoader();
+  let ML = loader.load ('https://i.imgur.com/jwW8du5.jpg');
+  MonaLisa = new THREE.Mesh (new THREE.PlaneGeometry (53*1.7,77*1.7), new THREE.MeshPhongMaterial({map:ML}));
+  MonaLisa.rotation.y= -Math.PI / 2;
+  MonaLisa.position.set(484.8,100,0);
+  scene.add(MonaLisa);
+  
+  
+  let lS = loader.load ('https://i.imgur.com/9s5DOrA.png');
+  lastSupper = new THREE.Mesh (new THREE.PlaneGeometry (880*0.4,460*0.4), new THREE.MeshPhongMaterial({map:lS}));
+  lastSupper.position.set(0,100,-484.8);
+  scene.add(lastSupper);
+  
+  let Ann = loader.load ('https://i.imgur.com/zxWwcG4.png');
+  Annunciation = new THREE.Mesh (new THREE.PlaneGeometry (217*1.8,98*1.8), new THREE.MeshPhongMaterial({map:Ann}));
+  Annunciation.rotation.y= -Math.PI ;
+  Annunciation.position.set(0,100,484.8);
+  scene.add(Annunciation);
+  
+  let La = loader.load ('https://i.imgur.com/n4IUKlQ.png');
+  Lady = new THREE.Mesh (new THREE.PlaneGeometry (39*2,54*2), new THREE.MeshPhongMaterial({map:La}));
+  Lady.rotation.y= -Math.PI ;
+  Lady.position.set(300,100,-165.2);
+  scene.add(Lady);
+  
+  let Vman = loader.load ('https://i.imgur.com/Tw2p01q.jpg');
+  Vitruvian = new THREE.Mesh (new THREE.PlaneGeometry (24.5*3,34.3*3), new THREE.MeshPhongMaterial({map:Vman}));
+  Vitruvian.rotation.y= -Math.PI ;
+  Vitruvian.position.set(-300,100,-165.2);
+  scene.add(Vitruvian);
+  
+  let Ch = loader.load ('https://i.imgur.com/jbqNrx8.png');
+  Madonna = new THREE.Mesh (new THREE.PlaneGeometry (106*0.9,141*0.9), new THREE.MeshPhongMaterial({map:Ch,alphaTest:0.5}));
+  Madonna.position.set(300,100,165.2);
+  scene.add(Madonna);
+  
+  let Vi = loader.load ('https://i.imgur.com/EfqrQwZ.png');
+  Virgin = new THREE.Mesh (new THREE.PlaneGeometry (130*0.8,168*0.8), new THREE.MeshPhongMaterial({map:Vi}));
+  Virgin.position.set(-300,100,165.2);
+  scene.add(Virgin);
+  
+ 
+  
+}
+
+function buildLight(){
+  var MonaLisalight =new Light(400,0,MonaLisa);
+  var lastSupperlight1 =new Light(150,-420,lastSupper);
+  var lastSupperlight2 =new Light(-150,-420,lastSupper);
+  var Annlight1 =new Light(150,420,Annunciation);
+  var Annlight2 =new Light(-150,420,Annunciation);
+  var Ladylight =new Light(300,-215,Lady);
+  var Vitruvianlight =new Light(-300,-215,Vitruvian);
+  var Madonnalight =new Light(300,215,Madonna);
+  var Virginlight =new Light(-300,215,Virgin);
+  lights=[MonaLisalight,lastSupperlight1,lastSupperlight2,Annlight1,Annlight2, Ladylight,Vitruvianlight,Madonnalight,Virginlight];
+  
+  
+}
+
+
+
+function buildWire(){
+
+const Wmaterial = new THREE.MeshBasicMaterial( {color: 0xc5c7c7} );
+
+var wire1 = new THREE.Mesh(new THREE.BoxGeometry(325, 2, 2), Wmaterial);
+wire1.position.set(0,190,-430);
+scene.add(wire1);
+
+var wire2 = new THREE.Mesh(new THREE.BoxGeometry(325, 2, 2), Wmaterial);
+wire2.position.set(0,190,430);
+scene.add(wire2);
+
+
+var wire3 = new THREE.Mesh(new THREE.BoxGeometry(750, 2, 2), Wmaterial);
+wire3.position.set(0,180,207);
+scene.add(wire3);
+
+var wire4 = new THREE.Mesh(new THREE.BoxGeometry(750, 2, 2), Wmaterial);
+wire4.position.set(0,180,-207);
+scene.add(wire4);
+
+var wire5 = new THREE.Mesh(new THREE.BoxGeometry(100, 2, 2), Wmaterial);
+wire5.position.set(410,180,0);
+wire5.rotation.y = -Math.PI/2;
+scene.add(wire5);
+
+
+
+
+}
+
+function buildChair(x,z) {
+  var group = new THREE.Group();
+  var woodTex = new THREE.TextureLoader().load("https://i.imgur.com/vLjQ0xw.png");
+  var mat = new THREE.MeshLambertMaterial({
+    map: woodTex
+  });
+  var boxTop = new THREE.Mesh(new THREE.BoxGeometry(200, 25, 50), mat);
+  var boxLeg1 = new THREE.Mesh(new THREE.BoxGeometry(12.5, 25, 50), mat);
+  var boxLeg2 = new THREE.Mesh(new THREE.BoxGeometry(12.5, 25, 50), mat);
+  boxTop.position.set(0,37.5, 0);
+  boxLeg1.position.set(-100 + 6.25, 12.5, 0);
+  boxLeg2.position.set(100 - 6.25, 12.5, 0);
+  group.add(boxTop, boxLeg1, boxLeg2);
+  group.position.set(x,0,z);
+  scene.add (group);
+}
+
+
+
+function buildFloor(){
+	let texture = new THREE.TextureLoader().load("https://i.imgur.com/Tjj77Uv.jpg");
+	texture.wrapS = THREE.RepeatWrapping;
+	texture.wrapT = THREE.RepeatWrapping;
+	texture.repeat.set (16, 13);
+	let material = new THREE.MeshPhongMaterial({map:texture});
+	let floor = new THREE.Mesh(new THREE.PlaneGeometry(1000,1000),material)
+	floor.rotation.x = -Math.PI/2
+	scene.add(floor);
+}
+
+function animate() {
+	if(LightSwitch)
+		lights.forEach(function (b){b.spotLight.visible = true;});
+	else
+		lights.forEach(function (b){b.spotLight.visible = false;});
+	if(CameraPos==8)	
+		CameraPos=0;
+	switch (CameraPos) {
+	case 0:
+		camera.position.set(0,1500,0);
+		camera.lookAt(0,0,0);
+		break;
+	case 1:
+		camera.position.set (300,100,0);
+		camera.lookAt(MonaLisa.position);
+		break;
+	case 2:
+		camera.position.set (0,100,-250);
+		camera.lookAt(lastSupper.position);
+		break;
+	case 3:
+		camera.position.set (0,100,230);
+		camera.lookAt(Annunciation.position);
+		break;
+	case 4:
+		camera.position.set (300,100,-300);
+		camera.lookAt(Lady.position);
+		break;
+	case 5:
+		camera.position.set (-300,100,-300);
+		camera.lookAt(Vitruvian.position);
+		break;
+	case 6:
+		camera.position.set (300,100,300);
+		camera.lookAt(Madonna.position);
+		break;
+	case 7:
+		camera.position.set (-300,100,300);
+		camera.lookAt(Virgin.position);
+		break;
+
+	default:
+    console.log('壞掉了QQ');
+}
+		
+		
+			
+	requestAnimationFrame(animate);
+	render();
+}
+
+function render() {
+	renderer.render(scene, camera);
+}
+</script>
+</body>
+</html>
