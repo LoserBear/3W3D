@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+<style>
+body{
+	margin:0px;
+}
+</style>
+</head>
+
+<body> 
+<h1 style="text-align:center">Homework 5</h1>
+<hr>
+<div id="container" style="float:left; margin:3px; width:50vw; height:50vw;">
+</div>
+
+<div style="float:left; margin-left: 10px; width:40vw;height:40vw; font-size:32px">
+    Ball Size:
+    <input id="radius" type= "range" min=5 max=15 value=10>
+    <span id='radiusPrint'>10</span>
+		<br>
+		<h1 id = "collision" >not collision</h1>
+		<br>
+		<button id='start' style="width:45%; height:10%; botton:10px">Stop the ball</button>
+		
+</div>
+
+<script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+<script src="https://threejs.org/build/three.min.js"></script>
+
+<script>
+
+$('#radius').change(function() {
+  $('#radiusPrint').text($(this).val());
+});
+var camera, scene, renderer, controls;
+var mouse = new THREE.Vector2();
+var start = true
+var target = null
+var box1,box2;
+var circle;
+var vel;
+var clock = new THREE.Clock();
+init();
+animate();
+
+$('#start').click(function() {
+	start = !start
+	if(!start)
+		$("#start").text("Start the ball")
+	else
+		$("#start").text("Stop the ball")
+});
+
+
+function init() {
+  var ww = $("#container").innerWidth();
+  var hh = $("#container").innerHeight();
+  renderer = new THREE.WebGLRenderer();
+  renderer.setSize(ww, hh);
+  renderer.setClearColor(0x888888);
+  $("#container").append(renderer.domElement);
+
+
+  scene = new THREE.Scene();
+  camera = new THREE.OrthographicCamera(-50, 50, 50, -50, -10, 100);
+  camera.position.z = 50;
+  scene.add(camera);
+
+  box1 = new THREE.Mesh(new THREE.BoxGeometry(20, 10),new THREE.MeshBasicMaterial({color:"blue"}));
+  box1.position.set(30, 20, 1)
+  
+  box2 = new THREE.Mesh(new THREE.BoxGeometry(10, 20),new THREE.MeshBasicMaterial({color:"blue"}));
+  box2.position.set(-20, -20, 1)
+  scene.add(box1,box2)
+	
+	circle = new THREE.Mesh(new THREE.CircleGeometry(10,32),new THREE.MeshBasicMaterial({color:'green'}))
+	circle.position.set(0,0,1)
+	vel = new THREE.Vector3(30,25,0)
+	scene.add(circle)
+	
+	
+	
+	
+  var gridXZ = new THREE.GridHelper(200, 20, 'red', 'white');
+	gridXZ.rotation.x = -Math.PI/2
+  scene.add(gridXZ);
+
+	
+}
+function onWindowResize() {
+  var ww = $("#container").innerWidth();
+  var hh = $("#container").innerHeight();
+
+  camera.aspect = ww / hh;
+  camera.updateProjectionMatrix();
+  renderer.setSize(ww, hh);
+}
+
+
+function animate() {
+	let r = document.getElementById("radius").value;
+	r = parseInt(r, 10)
+	circle.scale.set(r/10,r/10,r/10)
+	var dt = 0.016
+	if(start)
+  	circle.position.add(vel.clone().multiplyScalar(dt));
+  if (circle.position.x > 50 - r || circle.position.x < -50 + r)
+	    vel.x *= -1;
+	
+
+  if (circle.position.y > 50 - r || circle.position.y < -50 + r)
+	    vel.y *= -1;
+
+	 $.get("http://127.0.0.1:3000/api?cx="+ circle.position.x +"&cy="+ circle.position.y + "&r=" + r +"&minx=" + (box1.position.x - 10) + "&miny=" + (box1.position.y - 5) + "&maxx=" + (box1.position.x + 10) + "&maxy=" + (box1.position.y + 5), function( data ) {
+			
+		
+		if(data && data.output){
+			result = parseInt(data.output, 10);
+			if(result === 0){
+				$('#collision').text("not collision");
+				circle.material.color.set(0x00ff00)
+			}
+			if(result === 1){
+				$('#collision').text("Collision !!!");
+				circle.material.color.set(0xff0000)
+			}
+		}
+	});
+	  $.get("http://127.0.0.1:3000/api?cx="+ circle.position.x +"&cy="+ circle.position.y + "&r=" + r +"&minx=" + (box2.position.x - 5) + "&miny=" + (box2.position.y - 10) + "&maxx=" + (box2.position.x + 5) + "&maxy=" + (box2.position.y + 10), function( data ) {
+			
+		
+		if(data && data.output){
+			result = parseInt(data.output, 10);
+			if(result === 0){
+				$('#collision').text("not collision");
+				circle.material.color.set(0x00ff00)
+			}
+			if(result === 1){
+				$('#collision').text("Collision !!!");
+				circle.material.color.set(0xff0000)
+			}
+		}
+		
+	});
+
+
+  requestAnimationFrame(animate);
+  render();
+	
+}
+
+function render() {
+  renderer.render(scene, camera);
+}
+</script>
+</body>
+
+</html>
